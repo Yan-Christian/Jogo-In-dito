@@ -30,6 +30,7 @@ max_bullets = 4
 cooldown_time = 2
 reloading = False
 reload_start_time = 0
+bullet_direction = consts.BulletDirection.UP
 
 # load sound effect for shooting and reloading
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
@@ -69,9 +70,21 @@ while True:
 
     # Space key to shoot a bullet, only if not in reload mode and bullets available
     if key[pygame.K_SPACE] and bullet is None and bullets_left > 0 and not reloading:
-        bullet = [player_x + player_width // 2, player_y]
         shoot_sound.play()
         bullets_left -= 1
+
+        if player_angle == 0:
+            bullet = [player_x + player_width // 2, player_y]
+            bullet_direction = consts.BulletDirection.UP
+        if player_angle == 90:
+            bullet = [player_x, player_y + player_height // 2]
+            bullet_direction = consts.BulletDirection.LEFT
+        if player_angle == 180:
+            bullet = [player_x + player_width // 2, player_y]
+            bullet_direction = consts.BulletDirection.DOWN
+        if player_angle == -90:
+            bullet = [player_x, player_y + player_height // 2]
+            bullet_direction = consts.BulletDirection.RIGHT
 
         # inicia a recarga
         if bullets_left == 0:
@@ -87,19 +100,29 @@ while True:
             reloading = False
 
     if bullet:
-        bullet[1] -= bullet_speed
-
-
-        if bullet[1] < 0:
-            bullet = None
+        match bullet_direction:
+            case consts.BulletDirection.UP:
+                bullet[1] -= bullet_speed
+                if bullet[1] <= 0:
+                    bullet = None
+            case consts.BulletDirection.DOWN:
+                bullet[1] += bullet_speed
+                if bullet >= consts.WINDOW_HEIGHT:
+                    bullet = None
+            case consts.BulletDirection.LEFT:
+                bullet[0] -= bullet_speed
+                if bullet[0] <= 0:
+                    bullet = None
+            case consts.BulletDirection.RIGHT:
+                bullet[0] += bullet_speed
+                if bullet[0] >= consts.WINDOW_WIDTH:
+                    bullet = None
 
     # Rotaciona a nave
     player_rotated = pygame.transform.rotate(player_original, player_angle)
 
-
     screen.blit(background_image, (0, 0))  # Fundo
     screen.blit(player_rotated, (player_x, player_y))  # Nave
-
 
     if bullet:
         pygame.draw.circle(screen, consts.BULLET_COLOR, (bullet[0], bullet[1]), consts.BULLET_RADIUS)
@@ -114,5 +137,4 @@ while True:
         screen.blit(reload_text, (10, 50))
 
     pygame.display.update()
-
     clock.tick(60) 
