@@ -1,6 +1,7 @@
 import pygame
 import constants as consts
 import sys
+import mechanics as mec
 
 pygame.init()
 
@@ -10,20 +11,24 @@ screen = pygame.display.set_mode((consts.WINDOW_WIDTH, consts.WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Galactic Defenders')
 
+#background
 background_image = pygame.image.load("assets/Back_Image/Espace.jpg")
 
+#player 1
 player_original = pygame.image.load("assets/Player_1/Player 1.png")
 player_width, player_height = 50, 50
 player_original = pygame.transform.scale(player_original, (player_width, player_height))
-
 player_x = (consts.WINDOW_WIDTH - player_width) // 2
 player_y = consts.WINDOW_HEIGHT - player_height
-
 player_speed = 5
-
 player = player_original
 player_angle = 0
 
+#bullet
+bullet = pygame.draw.circle(screen, consts.BULLET_COLOR, (player_x, player_y), consts.BULLET_RADIUS,0)
+
+
+#game loop
 while True:
 
     for event in pygame.event.get():
@@ -48,6 +53,10 @@ while True:
     if key[pygame.K_DOWN] and player_y < consts.WINDOW_HEIGHT - player_height:
         player_y += player_speed
         player_angle = 180
+    if key[pygame.K_ESCAPE]:
+        pygame.quit()
+    if key[pygame.K_SPACE]:
+        mec.shoot(player_x, player_y, player_angle)
 
     player_rotated = pygame.transform.rotate(player_original, player_angle)
 
