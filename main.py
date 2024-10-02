@@ -12,6 +12,12 @@ pygame.display.set_caption('Galactic Defenders')
 
 background_image = pygame.image.load("assets/Back_Image/Espace.jpg")
 
+player = pygame.image.load("assets/Player_1/Player 1.png")
+player_width, player_height = 50, 50
+player = pygame.transform.scale(player, (player_width, player_height))
+
+player_x = (consts.WINDOW_WIDTH - player_width) // 2
+player_y = consts.WINDOW_HEIGHT - player_height
 
 while True:
 
@@ -20,13 +26,11 @@ while True:
             pygame.quit()
             sys.exit()
 
-    key = pygame.key.get_pressed()
-    if key[pygame.K_ESCAPE]:
-        pygame.quit()
-        sys.exit()
 
     screen.blit(background_image, (0, 0))
+    screen.blit(player, (player_x, player_y))
 
     pygame.display.update()
+
 
     clock.tick(60)
