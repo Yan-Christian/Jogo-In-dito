@@ -42,12 +42,15 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if easy_button.check_for_input(menu_mouse_pos):
+                    bg_music.stop()
                     button_sound.play()
                     return 'easy'
                 if medium_button.check_for_input(menu_mouse_pos):
+                    bg_music.stop()
                     button_sound.play()
                     return 'medium'
                 if hard_button.check_for_input(menu_mouse_pos):
+                    bg_music.stop()
                     button_sound.play()
                     return 'hard'
 
