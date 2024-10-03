@@ -20,6 +20,10 @@ BULLET_DX = 0
 BULLET_DY = 0
 BULLET_COLOR = (255, 255, 255)
 
+MAX_LIFES = 4
+
+MAX_ENEMY_SPAWN = 7
+
 
 class BulletDirection(Enum):
     LEFT = 0

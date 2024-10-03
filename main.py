@@ -4,32 +4,7 @@ import sys
 import random
 from button import Button
 import mechanics as mec
-
-
-# Classe para os inimigos
-class Enemy:
-    def __init__(self, x, y, width, height, speed):
-        self.image = pygame.image.load("assets/Enemies/Level_1.png")
-        self.image = pygame.transform.scale(self.image, (width, height))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.speed = speed
-        self.direction_x = random.choice([-1, 1])
-        self.direction_y = random.choice([-1, 1])
-
-    def move(self):
-        self.rect.x += self.speed * self.direction_x
-        self.rect.y += self.speed * self.direction_y
-
-        # Inverter direção ao atingir bordas da tela
-        if self.rect.left <= 0 or self.rect.right >= consts.WINDOW_WIDTH:
-            self.direction_x *= -1
-        if self.rect.top <= 0 or self.rect.bottom >= consts.WINDOW_HEIGHT:
-            self.direction_y *= -1
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
+from models.Enemy import Enemy
 
 
 def get_font(size):
@@ -49,12 +24,18 @@ def main_menu():
         menu_text = get_font(38).render(consts.TITLE, True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
 
-        easy_button = Button(image=pygame.image.load(consts.RECT), pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2),
-                             text_input="EASY", font=get_font(25), base_color=consts.BASE_COLOR, hovering_color=consts.HOVERING_COLOR)
-        medium_button = Button(image=pygame.image.load(consts.RECT), pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 100),
-                               text_input="MEDIUM", font=get_font(25), base_color=consts.BASE_COLOR, hovering_color=consts.HOVERING_COLOR)
-        hard_button = Button(image=pygame.image.load(consts.RECT), pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 200),
-                             text_input="HARD", font=get_font(25), base_color=consts.BASE_COLOR, hovering_color=consts.HOVERING_COLOR)
+        easy_button = Button(image=pygame.image.load(consts.RECT),
+                             pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2),
+                             text_input="EASY", font=get_font(25), base_color=consts.BASE_COLOR,
+                             hovering_color=consts.HOVERING_COLOR)
+        medium_button = Button(image=pygame.image.load(consts.RECT),
+                               pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 100),
+                               text_input="MEDIUM", font=get_font(25), base_color=consts.BASE_COLOR,
+                               hovering_color=consts.HOVERING_COLOR)
+        hard_button = Button(image=pygame.image.load(consts.RECT),
+                             pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 200),
+                             text_input="HARD", font=get_font(25), base_color=consts.BASE_COLOR,
+                             hovering_color=consts.HOVERING_COLOR)
 
         screen.blit(menu_text, menu_rect)
 
@@ -117,6 +98,10 @@ cooldown_time = 2
 reloading = False
 reload_start_time = 0
 bullet_direction = consts.BulletDirection.UP
+drawed_bullet = 4
+
+lifes = 4
+drawed_lifes = 4
 
 # load sound effect for shooting and reloading
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
@@ -127,12 +112,22 @@ enemy_list = []
 enemy_spawn_time = 2000  # Tempo para criação de novos inimigos (em milissegundos)
 last_enemy_spawn = pygame.time.get_ticks()
 
+
+def draw_lifes(lifes_remaining):
+    x_lifes = 10
+    for i in range(lifes_remaining):
+        life_image = pygame.image.load("assets/hearts/heart.png")
+        life_image = pygame.transform.scale(life_image, (50, 43))
+        screen.blit(life_image, (x_lifes, 20))
+        x_lifes += 50
+
+
 def create_enemy():
     """Função para criar um inimigo em uma posição aleatória."""
     x = random.randint(0, consts.WINDOW_WIDTH - 50)
     y = random.randint(0, consts.WINDOW_HEIGHT // 2)  # Inimigos começam na metade superior da tela
     speed = random.randint(1, 3)
-    enemy = Enemy(x, y, 50, 50, speed)
+    enemy = Enemy(x, y, 50, 50, speed, difficulty)
     enemy_list.append(enemy)
 
 
@@ -224,7 +219,8 @@ while True:
     # Criar novos inimigos de acordo com o tempo
     current_time = pygame.time.get_ticks()
     if current_time - last_enemy_spawn > enemy_spawn_time:
-        create_enemy()
+        if len(enemy_list) <= consts.MAX_ENEMY_SPAWN:
+            create_enemy()
         last_enemy_spawn = current_time
 
     # Atualizar movimento dos inimigos e verificar colisões
@@ -233,6 +229,11 @@ while True:
         if bullet and enemy.rect.collidepoint(bullet[0], bullet[1]):
             bullet = None  # Remove a bala
             enemy_list.remove(enemy)  # Remove o inimigo atingido
+
+    # Verificar colisão com o jogador
+    for enemy in enemy_list:
+        if enemy.rect.collidepoint(player_x, player_y):
+            lifes -= 1
 
     # Desenhar na tela
     screen.blit(background_image, (0, 0))  # Fundo
@@ -243,6 +244,8 @@ while True:
     for enemy in enemy_list:
         enemy.draw(screen)
 
+    draw_lifes(lifes)
+
     # Desenhar a bala
     if bullet:
         pygame.draw.circle(screen, consts.BULLET_COLOR, (bullet[0], bullet[1]), consts.BULLET_RADIUS)
@@ -250,12 +253,12 @@ while True:
     # Exibir balas restantes
     font = pygame.font.SysFont(None, 36)
     ammo_text = font.render(f'Balas: {bullets_left}', True, (255, 255, 255))
-    screen.blit(ammo_text, (10, 10))
+    screen.blit(ammo_text, (10, 70))
 
     # Exibir mensagem de recarregamento, se aplicável
     if reloading:
         reload_text = font.render('Recarregando...', True, (255, 0, 0))
-        screen.blit(reload_text, (10, 50))
+        screen.blit(reload_text, (10, 90))
 
     # Atualizar a tela
     pygame.display.update()
