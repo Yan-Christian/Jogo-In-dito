@@ -43,10 +43,13 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if easy_button.check_for_input(menu_mouse_pos):
                     button_sound.play()
+                    return 'easy'
                 if medium_button.check_for_input(menu_mouse_pos):
                     button_sound.play()
+                    return 'medium'
                 if hard_button.check_for_input(menu_mouse_pos):
                     button_sound.play()
+                    return 'hard'
 
         key = pygame.key.get_pressed()
         if key[pygame.K_ESCAPE]:
@@ -89,7 +92,7 @@ bullet_direction = consts.BulletDirection.UP
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
 reload_sound = pygame.mixer.Sound("assets/Sound game/Recarregamento.mp3")
 
-#main_menu()
+difficulty = main_menu()
 # game loop
 
 
