@@ -169,7 +169,7 @@ while True:
                     bullet = None
             case consts.BulletDirection.DOWN:
                 bullet[1] += bullet_speed
-                if bullet >= consts.WINDOW_HEIGHT:
+                if bullet[1] >= consts.WINDOW_HEIGHT:
                     bullet = None
             case consts.BulletDirection.LEFT:
                 bullet[0] -= bullet_speed
