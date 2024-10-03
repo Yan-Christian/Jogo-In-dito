@@ -4,35 +4,36 @@ import sys
 from button import Button
 import mechanics as mec
 
-
-#main menu screen
-
+# Função para carregar fontes
 def get_font(size):
     return pygame.font.Font(consts.FONT, size)
+
+# Menu principal
 def main_menu():
     pygame.display.set_caption("Main Menu")
-    bg_music =pygame.mixer.Sound(consts.BG_MUSIC)
+    bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
-
 
     while True:
         bg_music.play()
-        screen.blit(background_image,(0,0))
+        screen.blit(background_image, (0, 0))
 
         menu_mouse_pos = pygame.mouse.get_pos()
-        menu_text  = get_font(38).render(consts.TITLE, True, consts.WHITE)
-        menu_rect = menu_text.get_rect(center = (consts.WINDOW_WIDTH//2,100))
+        menu_text = get_font(38).render(consts.TITLE, True, consts.WHITE)
+        menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
 
-        easy_button = Button(image = pygame.image.load(consts.RECT),pos=(consts.WINDOW_WIDTH//2,consts.WINDOW_HEIGHT//2),
-                             text_input="EASY",font=get_font(25),base_color=consts.BASE_COLOR,hovering_color=consts.HOVERING_COLOR)
-        medium_button = Button(image=pygame.image.load(consts.RECT),pos=(consts.WINDOW_WIDTH//2,consts.WINDOW_HEIGHT//2 + 100),
-                               text_input="MEDIUM",font=get_font(25),base_color = consts.BASE_COLOR,hovering_color=consts.HOVERING_COLOR)
-        hard_button = Button(image=pygame.image.load(consts.RECT),pos=(consts.WINDOW_WIDTH//2,consts.WINDOW_HEIGHT//2+200),
-                             text_input="HARD",font =get_font(25),base_color=consts.BASE_COLOR,hovering_color=consts.HOVERING_COLOR)
+        # Botões para escolher o nível de dificuldade
+        easy_button = Button(image=pygame.image.load(consts.RECT), pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2),
+                             text_input="EASY", font=get_font(25), base_color=consts.BASE_COLOR, hovering_color=consts.HOVERING_COLOR)
+        medium_button = Button(image=pygame.image.load(consts.RECT), pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 100),
+                               text_input="MEDIUM", font=get_font(25), base_color=consts.BASE_COLOR, hovering_color=consts.HOVERING_COLOR)
+        hard_button = Button(image=pygame.image.load(consts.RECT), pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 200),
+                             text_input="HARD", font=get_font(25), base_color=consts.BASE_COLOR, hovering_color=consts.HOVERING_COLOR)
 
-        screen.blit(menu_text,menu_rect)
+        screen.blit(menu_text, menu_rect)
 
-        for button in [easy_button,medium_button,hard_button]:
+        # Alterar a cor e atualizar os botões
+        for button in [easy_button, medium_button, hard_button]:
             button.change_color(menu_mouse_pos)
             button.update(screen)
 
@@ -59,20 +60,20 @@ def main_menu():
             pygame.quit()
             sys.exit()
 
-
         pygame.display.update()
+
 pygame.init()
 pygame.mixer.init()
 
-# screen setup
+# Tela do jogo
 screen = pygame.display.set_mode((consts.WINDOW_WIDTH, consts.WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Galactic Defenders')
 
-# background
+# Carregar fundo
 background_image = pygame.image.load("assets/Back_Image/Espace.jpg")
 
-# player setup
+# Configurações do player (nave)
 player_original = pygame.image.load("assets/Player_1/Player 1.png")
 player_width, player_height = 50, 50
 player_original = pygame.transform.scale(player_original, (player_width, player_height))
@@ -81,24 +82,36 @@ player_y = consts.WINDOW_HEIGHT - player_height
 player_speed = 5
 player_angle = 0
 
-# bullet setup
+# Configurações das balas
 bullet_speed = 7
 bullet = None
-bullets_left = 4
-max_bullets = 4
-cooldown_time = 2
-reloading = False
-reload_start_time = 0
 bullet_direction = consts.BulletDirection.UP
 
-# load sound effect for shooting and reloading
+# Dificuldade selecionada no menu
+difficulty = main_menu()
+
+# Ajustar o número de balas e tempo de recarga com base no modo
+if difficulty == 'easy':
+    bullets_left = 6
+    max_bullets = 6
+    cooldown_time = 1
+elif difficulty == 'medium':
+    bullets_left = 4
+    max_bullets = 4
+    cooldown_time = 2
+else:
+    bullets_left = 3
+    max_bullets = 3
+    cooldown_time = 3
+
+reloading = False
+reload_start_time = 0
+
+# Sons de disparo e recarga
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
 reload_sound = pygame.mixer.Sound("assets/Sound game/Recarregamento.mp3")
 
-difficulty = main_menu()
-# game loop
-
-
+# Loop principal do jogo
 while True:
 
     for event in pygame.event.get():
@@ -106,9 +119,9 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Key inputs
     key = pygame.key.get_pressed()
 
+    # Movimento da nave
     if key[pygame.K_LEFT] and player_x > 0:
         player_x -= player_speed
         player_angle = 90
@@ -125,16 +138,12 @@ while True:
         player_y += player_speed
         player_angle = 180
 
-    # Escape key to quit the game
-    if key[pygame.K_ESCAPE]:
-        pygame.quit()
-        sys.exit()
-
-    # Space key to shoot a bullet, only if not in reload mode and bullets available
+    # Disparo
     if key[pygame.K_SPACE] and bullet is None and bullets_left > 0 and not reloading:
         shoot_sound.play()
         bullets_left -= 1
 
+        # Direção do disparo baseado no ângulo da nave
         if player_angle == 0:
             bullet = [player_x + player_width // 2, player_y]
             bullet_direction = consts.BulletDirection.UP
@@ -148,19 +157,20 @@ while True:
             bullet = [player_x, player_y + player_height // 2]
             bullet_direction = consts.BulletDirection.RIGHT
 
-        # inicia a recarga
+        # Iniciar recarga se as balas acabarem
         if bullets_left == 0:
             reloading = True
             reload_start_time = pygame.time.get_ticks()
             reload_sound.play()
 
-    # Se estiver recarregando, verifica o tempo de recarga
+    # Verificar recarga
     if reloading:
         current_time = pygame.time.get_ticks()
         if current_time - reload_start_time >= cooldown_time * 1000:
             bullets_left = max_bullets
             reloading = False
 
+    # Movimentação da bala
     if bullet:
         match bullet_direction:
             case consts.BulletDirection.UP:
@@ -180,16 +190,17 @@ while True:
                 if bullet[0] >= consts.WINDOW_WIDTH:
                     bullet = None
 
-    # Rotaciona a nave
+    # Rotação da nave
     player_rotated = pygame.transform.rotate(player_original, player_angle)
 
-    screen.blit(background_image, (0, 0))  # Fundo
-    screen.blit(player_rotated, (player_x, player_y))  # Nave
+    # Desenhar fundo, nave e bala
+    screen.blit(background_image, (0, 0))
+    screen.blit(player_rotated, (player_x, player_y))
 
     if bullet:
         pygame.draw.circle(screen, consts.BULLET_COLOR, (bullet[0], bullet[1]), consts.BULLET_RADIUS)
 
-    # Mostra a quantidade de balas
+    # Exibir balas restantes
     font = pygame.font.SysFont(None, 36)
     ammo_text = font.render(f'Balas: {bullets_left}', True, (255, 255, 255))
     screen.blit(ammo_text, (10, 10))
