@@ -1,7 +1,60 @@
 import pygame
 import constants as consts
 import sys
+from button import Button
+import mechanics as mec
 
+
+#main menu screen
+
+def get_font(size):
+    return pygame.font.Font(consts.FONT, size)
+def main_menu():
+    pygame.display.set_caption("Main Menu")
+    bg_music =pygame.mixer.Sound(consts.BG_MUSIC)
+    button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
+
+
+    while True:
+        bg_music.play()
+        screen.blit(background_image,(0,0))
+
+        menu_mouse_pos = pygame.mouse.get_pos()
+        menu_text  = get_font(38).render(consts.TITLE, True, consts.WHITE)
+        menu_rect = menu_text.get_rect(center = (consts.WINDOW_WIDTH//2,100))
+
+        easy_button = Button(image = pygame.image.load(consts.RECT),pos=(consts.WINDOW_WIDTH//2,consts.WINDOW_HEIGHT//2),
+                             text_input="EASY",font=get_font(25),base_color=consts.BASE_COLOR,hovering_color=consts.HOVERING_COLOR)
+        medium_button = Button(image=pygame.image.load(consts.RECT),pos=(consts.WINDOW_WIDTH//2,consts.WINDOW_HEIGHT//2 + 100),
+                               text_input="MEDIUM",font=get_font(25),base_color = consts.BASE_COLOR,hovering_color=consts.HOVERING_COLOR)
+        hard_button = Button(image=pygame.image.load(consts.RECT),pos=(consts.WINDOW_WIDTH//2,consts.WINDOW_HEIGHT//2+200),
+                             text_input="HARD",font =get_font(25),base_color=consts.BASE_COLOR,hovering_color=consts.HOVERING_COLOR)
+
+        screen.blit(menu_text,menu_rect)
+
+        for button in [easy_button,medium_button,hard_button]:
+            button.change_color(menu_mouse_pos)
+            button.update(screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if easy_button.check_for_input(menu_mouse_pos):
+                    button_sound.play()
+                if medium_button.check_for_input(menu_mouse_pos):
+                    button_sound.play()
+                if hard_button.check_for_input(menu_mouse_pos):
+                    button_sound.play()
+
+        key = pygame.key.get_pressed()
+        if key[pygame.K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+
+
+        pygame.display.update()
 pygame.init()
 pygame.mixer.init()
 
@@ -36,7 +89,10 @@ bullet_direction = consts.BulletDirection.UP
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
 reload_sound = pygame.mixer.Sound("assets/Sound game/Recarregamento.mp3")
 
+#main_menu()
 # game loop
+
+
 while True:
 
     for event in pygame.event.get():
@@ -137,4 +193,4 @@ while True:
         screen.blit(reload_text, (10, 50))
 
     pygame.display.update()
-    clock.tick(60) 
+    clock.tick(60)

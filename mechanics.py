@@ -2,5 +2,3 @@ import constants as consts
 
 
 
-
-
