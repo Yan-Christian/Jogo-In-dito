@@ -5,8 +5,6 @@ import random
 from button import Button
 import mechanics as mec
 from models.Enemy import Enemy
-import time
-
 running = False
 
 pygame.init()
