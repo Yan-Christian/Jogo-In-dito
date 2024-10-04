@@ -133,9 +133,11 @@ def create_enemy():
 
 difficulty = main_menu()
 
+timeout_shadow_player = 3000
+timeout_max_time = 3000
+
 # Loop principal do jogo
 while True:
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -230,11 +232,6 @@ while True:
             bullet = None  # Remove a bala
             enemy_list.remove(enemy)  # Remove o inimigo atingido
 
-    # Verificar colisão com o jogador
-    for enemy in enemy_list:
-        if enemy.rect.collidepoint(player_x, player_y):
-            lifes -= 1
-
     # Desenhar na tela
     screen.blit(background_image, (0, 0))  # Fundo
     player_rotated = pygame.transform.rotate(player_original, player_angle)
@@ -243,6 +240,12 @@ while True:
     # Desenhar inimigos
     for enemy in enemy_list:
         enemy.draw(screen)
+
+    # Verificar colisão com o jogador
+    for enemy in enemy_list:
+        if enemy.rect.colliderect(
+                player_rotated.get_rect()):
+            lifes -= 1
 
     draw_lifes(lifes)
 

@@ -16,7 +16,7 @@ class Enemy:
         else:
             self.image = pygame.image.load('assets/Enemies/Level_3.png')
         self.image = pygame.transform.scale(self.image, (width, height))
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect().copy()
         self.rect.x = x
         self.rect.y = y
         self.speed = speed
