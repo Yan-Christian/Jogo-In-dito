@@ -6,12 +6,15 @@ from button import Button
 import mechanics as mec
 from models.Enemy import Enemy
 
+running = False
+
 
 def get_font(size):
     return pygame.font.Font(consts.FONT, size)
 
 
 def main_menu():
+    global running
     pygame.display.set_caption("Main Menu")
     bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
@@ -48,6 +51,7 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                running = True
                 if easy_button.check_for_input(menu_mouse_pos):
                     bg_music.stop()
                     button_sound.play()
@@ -75,7 +79,6 @@ pygame.mixer.init()
 # screen setup
 screen = pygame.display.set_mode((consts.WINDOW_WIDTH, consts.WINDOW_HEIGHT))
 clock = pygame.time.Clock()
-pygame.display.set_caption('Galactic Defenders')
 
 # background
 background_image = pygame.image.load("assets/Back_Image/Espace.jpg")
@@ -135,12 +138,51 @@ def create_enemy():
 
 
 difficulty = main_menu()
+pygame.display.set_caption('Galactic Defenders')
 
 timeout_shadow_player = 3000
 timeout_max_time = 3000
 
+
+def game_over():
+    global difficulty
+    pygame.display.set_caption("Game over")
+    screen.blit(background_image, (0, 0))
+
+    bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
+    button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
+
+    while True:
+        bg_music.play()
+        menu_mouse_pos = pygame.mouse.get_pos()
+        menu_text = get_font(38).render("GAME OVER", True, consts.WHITE)
+        menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
+
+        to_main_menu = Button(image=pygame.image.load(consts.RECT),
+                              pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) + 120),
+                              text_input="Return to menu", font=get_font(25), base_color=consts.BASE_COLOR,
+                              hovering_color=consts.HOVERING_COLOR)
+        screen.blit(menu_text, menu_rect)
+
+        for button in [to_main_menu]:
+            button.change_color(menu_mouse_pos)
+            button.update(screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if to_main_menu.check_for_input(menu_mouse_pos):
+                    button_sound.play()
+                    difficulty = main_menu()
+                    return ''
+        pygame.display.update()
+
+
 # Loop principal do jogo
-while True:
+while running:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -254,9 +296,13 @@ while True:
                                                    player_y,
                                                    player_rotated.get_rect().width,
                                                    player_rotated.get_rect().height)) and not shadow_player:
-            lifes -= 1
-            shadow_player = True
-            timeout_shadow_player = current_time
+            if lifes == 1:
+                running = False
+                game_over()
+            else:
+                lifes -= 1
+                shadow_player = True
+                timeout_shadow_player = current_time
 
     draw_lifes(lifes)
 
