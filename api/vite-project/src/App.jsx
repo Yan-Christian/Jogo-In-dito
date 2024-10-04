@@ -14,23 +14,21 @@ function App() {
 
       <div>
         <a href="" target="">
-          <img src={ship} className="ship" alt="asteroid" />
-        </a>
-        <a href="" target="">
           <img src={ship} className="ship" alt="ship" />
         </a>
       </div>
-      <h1>Pre-order GALATIC DEFENDERS NOW!!!</h1>
+      <h1>Galatic Defenders!</h1>
+      <h2>Seja um sobrevivente defensor da galáxia!!</h2>
       <form action="">
-        <input type="name" name="" id="" placeholder='name' />
+        <input type="name" name="" id="" placeholder='nome' />
         <input type="email" placeholder='email'/>
       </form>
       <div className="card">
         <button >
-          BUY NOW! 
+          COMPRE AGORA! 
         </button>
         <p>
-          Available until October 8th
+          Disponível até 8 de Outubro
         </p>
       </div>
       <p className="read-the-docs">
