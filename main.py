@@ -355,7 +355,6 @@ while running:
     ammo_text = font.render(f'ammo: {bullets_left}', True, consts.WHITE)
     screen.blit(ammo_text, (10, 70))
 
-    #exhibit time
 
 
 
@@ -364,13 +363,13 @@ while running:
         reload_text = font.render('reloading...', True, consts.RED)
         screen.blit(reload_text, (10, 95))
 
-    # Atualizar a tela
 
-
+    #exhibit time
     time_text = font.render(f'{Time//60}', True, consts.WHITE)
     screen.blit(time_text, (10, 125))
     Time -=1
 
 
+    # Atualizar a tela
     pygame.display.update()
     clock.tick(60)
