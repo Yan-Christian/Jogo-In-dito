@@ -8,6 +8,13 @@ from models.Enemy import Enemy
 
 running = False
 
+pygame.init()
+pygame.mixer.init()
+
+# Defining audios channel
+background_channel = pygame.mixer.Channel(0)
+sound_effect_channel = pygame.mixer.Channel(1)
+
 
 def get_font(size):
     return pygame.font.Font(consts.FONT, size)
@@ -18,9 +25,9 @@ def main_menu():
     pygame.display.set_caption("Main Menu")
     bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
+    background_channel.play(bg_music, loops=-1)
 
     while True:
-        bg_music.play()
         screen.blit(background_image, (0, 0))
 
         menu_mouse_pos = pygame.mouse.get_pos()
@@ -51,17 +58,19 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                running = True
                 if easy_button.check_for_input(menu_mouse_pos):
-                    bg_music.stop()
+                    running = True
+                    background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
                     return 'easy'
                 if medium_button.check_for_input(menu_mouse_pos):
-                    bg_music.stop()
+                    running = True
+                    background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
                     return 'medium'
                 if hard_button.check_for_input(menu_mouse_pos):
-                    bg_music.stop()
+                    running = True
+                    background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
                     return 'hard'
 
@@ -72,9 +81,6 @@ def main_menu():
 
         pygame.display.update()
 
-
-pygame.init()
-pygame.mixer.init()
 
 # screen setup
 screen = pygame.display.set_mode((consts.WINDOW_WIDTH, consts.WINDOW_HEIGHT))
@@ -109,14 +115,17 @@ drawed_bullet = 4
 # life
 cooldown_lost_life = 2
 lifes = 4
-drawed_lifes = 4
 shadow_player = False
+
+# Load music
+pygame.mixer.music.set_volume(0.5)
 
 # load sound effects
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
 reload_sound = pygame.mixer.Sound("assets/Sound game/Recarregamento.mp3")
 lose_life_sound = pygame.mixer.Sound("assets/Sound game/lose_life_audio.mp3")
 game_over_sound = pygame.mixer.Sound("assets/Sound game/game_over_sound.wav")
+game_background_music = pygame.mixer.Sound("assets/Sound game/game_background_sound.mp3")
 
 # Configuração dos inimigos
 enemy_list = []
@@ -150,7 +159,7 @@ timeout_max_time = 3000
 
 
 def game_over():
-    global difficulty
+    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x
     pygame.display.set_caption("Game over")
     screen.blit(background_image, (0, 0))
 
@@ -158,6 +167,7 @@ def game_over():
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
     time_game_over = 1000
     time_open_game_over = pygame.time.get_ticks()
+    background_channel.stop()
 
     while True:
         current_time_game_over = pygame.time.get_ticks()
@@ -187,13 +197,17 @@ def game_over():
                 if to_main_menu.check_for_input(menu_mouse_pos):
                     button_sound.play()
                     difficulty = main_menu()
-                    return ''
+                    bullets_left = 4
+                    lifes = 4
+                    enemy_list = []
+                    player_x = (consts.WINDOW_WIDTH - player_width) // 2
+                    player_y = consts.WINDOW_HEIGHT - player_height
+                    return
         pygame.display.update()
 
 
 # Loop principal do jogo
 while running:
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -225,7 +239,7 @@ while running:
 
     # Space key to shoot a bullet, only if not in reload mode and bullets available
     if key[pygame.K_SPACE] and bullet is None and bullets_left > 0 and not reloading:
-        shoot_sound.play()
+        sound_effect_channel.play(shoot_sound, loops=0)
         bullets_left -= 1
 
         if player_angle == 0:
@@ -245,7 +259,7 @@ while running:
         if bullets_left == 0:
             reloading = True
             reload_start_time = pygame.time.get_ticks()
-            reload_sound.play()
+            sound_effect_channel.play(reload_sound, loops=0)
 
     # Se estiver recarregando, verifica o tempo de recarga
     if reloading:
@@ -318,7 +332,7 @@ while running:
                 running = False
                 game_over()
             else:
-                lose_life_sound.play()
+                sound_effect_channel.play(lose_life_sound, 0)
                 lifes -= 1
                 shadow_player = True
                 timeout_shadow_player = current_time
