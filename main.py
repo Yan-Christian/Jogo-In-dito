@@ -100,8 +100,11 @@ reload_start_time = 0
 bullet_direction = consts.BulletDirection.UP
 drawed_bullet = 4
 
+# life
+cooldown_lost_life = 2
 lifes = 4
 drawed_lifes = 4
+shadow_player = False
 
 # load sound effect for shooting and reloading
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
@@ -241,11 +244,19 @@ while True:
     for enemy in enemy_list:
         enemy.draw(screen)
 
+    if shadow_player:
+        if current_time - timeout_shadow_player >= cooldown_lost_life * 1000:
+            shadow_player = False
+
     # Verificar colisão com o jogador
     for enemy in enemy_list:
-        if enemy.rect.colliderect(
-                player_rotated.get_rect()):
+        if enemy.rect.colliderect(pygame.rect.Rect(player_x,
+                                                   player_y,
+                                                   player_rotated.get_rect().width,
+                                                   player_rotated.get_rect().height)) and not shadow_player:
             lifes -= 1
+            shadow_player = True
+            timeout_shadow_player = current_time
 
     draw_lifes(lifes)
 
