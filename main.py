@@ -91,6 +91,9 @@ player_x = (consts.WINDOW_WIDTH - player_width) // 2
 player_y = consts.WINDOW_HEIGHT - player_height
 player_speed = 5
 player_angle = 0
+last_time_blink = pygame.time.get_ticks()
+blink_interval = 250
+player_visible = True
 
 # bullet setup
 bullet_speed = 7
@@ -109,9 +112,11 @@ lifes = 4
 drawed_lifes = 4
 shadow_player = False
 
-# load sound effect for shooting and reloading
+# load sound effects
 shoot_sound = pygame.mixer.Sound("assets/Sound game/Disparo.mp3")
 reload_sound = pygame.mixer.Sound("assets/Sound game/Recarregamento.mp3")
+lose_life_sound = pygame.mixer.Sound("assets/Sound game/lose_life_audio.mp3")
+game_over_sound = pygame.mixer.Sound("assets/Sound game/game_over_sound.wav")
 
 # Configuração dos inimigos
 enemy_list = []
@@ -151,9 +156,15 @@ def game_over():
 
     bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
+    time_game_over = 1000
+    time_open_game_over = pygame.time.get_ticks()
 
     while True:
-        bg_music.play()
+        current_time_game_over = pygame.time.get_ticks()
+        if current_time_game_over - time_open_game_over <= time_game_over:
+            game_over_sound.play()
+        else:
+            bg_music.play()
         menu_mouse_pos = pygame.mouse.get_pos()
         menu_text = get_font(38).render("GAME OVER", True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
@@ -277,10 +288,17 @@ while running:
             bullet = None  # Remove a bala
             enemy_list.remove(enemy)  # Remove o inimigo atingido
 
+    if shadow_player:
+        if current_time - last_time_blink >= blink_interval:
+            player_visible = not player_visible
+            last_time_blink = current_time
+
     # Desenhar na tela
     screen.blit(background_image, (0, 0))  # Fundo
     player_rotated = pygame.transform.rotate(player_original, player_angle)
-    screen.blit(player_rotated, (player_x, player_y))  # Nave
+
+    if player_visible:
+        screen.blit(player_rotated, (player_x, player_y))  # Nave
 
     # Desenhar inimigos
     for enemy in enemy_list:
@@ -300,6 +318,7 @@ while running:
                 running = False
                 game_over()
             else:
+                lose_life_sound.play()
                 lifes -= 1
                 shadow_player = True
                 timeout_shadow_player = current_time
