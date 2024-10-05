@@ -5,7 +5,6 @@ import random
 from button import Button
 import mechanics as mec
 from models.Enemy import Enemy
-
 running = False
 
 pygame.init()
@@ -205,7 +204,14 @@ def game_over():
                     return
         pygame.display.update()
 
-
+def survival_time (difficulty):
+    if difficulty == 'easy':
+        return 120*60
+    if difficulty == 'medium':
+        return 150*60
+    if difficulty == 'hard':
+        return 180*60
+Time = survival_time(difficulty)
 # Loop principal do jogo
 while running:
     for event in pygame.event.get():
@@ -270,6 +276,7 @@ while running:
 
     # Atualizar a bala
     if bullet:
+
         match bullet_direction:
             case consts.BulletDirection.UP:
                 bullet[1] -= bullet_speed
@@ -344,14 +351,24 @@ while running:
         pygame.draw.circle(screen, consts.BULLET_COLOR, (bullet[0], bullet[1]), consts.BULLET_RADIUS)
 
     # Exibir balas restantes
-    font = pygame.font.SysFont(None, 36)
-    ammo_text = font.render(f'Balas: {bullets_left}', True, (255, 255, 255))
+    font = get_font(20)
+    ammo_text = font.render(f'ammo: {bullets_left}', True, consts.WHITE)
     screen.blit(ammo_text, (10, 70))
+
+
+
 
     # Exibir mensagem de recarregamento, se aplicável
     if reloading:
-        reload_text = font.render('Recarregando...', True, (255, 0, 0))
-        screen.blit(reload_text, (10, 90))
+        reload_text = font.render('reloading...', True, consts.RED)
+        screen.blit(reload_text, (10, 95))
+
+
+    #exhibit time
+    time_text = font.render(f'{Time//60}', True, consts.WHITE)
+    screen.blit(time_text, (10, 125))
+    Time -=1
+
 
     # Atualizar a tela
     pygame.display.update()

@@ -4,6 +4,8 @@
     font-weight: 400;
     font-style: normal;
     font-size: 16px;
+    background-color: black;
+    max-height: 100vh;
 }
 #root {
   max-width: 1280px;
@@ -13,15 +15,16 @@
 }
 
 .ship {
-  height: 10rem;
+  height: 8rem;
   padding: 1.5rem;
   will-change: filter;
   transition: filter 300ms;
+  animation: shake 0.5s;
+  animation-iteration-count: infinite;
 }
 .ship:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
-  animation: shake 0.5s;
-  animation-iteration-count: infinite;
+  animation: logo-spin 0.5s
 }
 .ship.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
@@ -72,16 +75,12 @@ form {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  max-width: 50%;
+  max-width: 30%;
 
 }
 form input{
   margin-top: 1rem;
   border-radius: .5rem;
   height: 2rem;
-}
-.bg {
-  position:absolute;
-  z-index: -1;
 }
 
