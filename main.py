@@ -5,7 +5,9 @@ import random
 from button import Button
 import mechanics as mec
 from models.Enemy import Enemy
+
 running = False
+Time = 0
 
 pygame.init()
 pygame.mixer.init()
@@ -15,12 +17,21 @@ background_channel = pygame.mixer.Channel(0)
 sound_effect_channel = pygame.mixer.Channel(1)
 
 
+def survival_time(difficulty):
+    if difficulty == 'easy':
+        return 10 * 60
+    if difficulty == 'medium':
+        return 150 * 60
+    if difficulty == 'hard':
+        return 180 * 60
+
+
 def get_font(size):
     return pygame.font.Font(consts.FONT, size)
 
 
 def main_menu():
-    global running
+    global running, Time
     pygame.display.set_caption("Main Menu")
     bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
@@ -33,15 +44,15 @@ def main_menu():
         menu_text = get_font(38).render(consts.TITLE, True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
         image = pygame.image.load(consts.RECT)
-        easy_button = Button(image =pygame.transform.scale(image,(370,80)) ,
+        easy_button = Button(image=pygame.transform.scale(image, (370, 80)),
                              pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2),
                              text_input="EASY", font=get_font(25), base_color=consts.BASE_COLOR,
                              hovering_color=consts.HOVERING_COLOR)
-        medium_button = Button(image =pygame.transform.scale(image,(370,80)) ,
+        medium_button = Button(image=pygame.transform.scale(image, (370, 80)),
                                pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 100),
                                text_input="MEDIUM", font=get_font(25), base_color=consts.BASE_COLOR,
                                hovering_color=consts.HOVERING_COLOR)
-        hard_button = Button(image =pygame.transform.scale(image,(370,80)) ,
+        hard_button = Button(image=pygame.transform.scale(image, (370, 80)),
                              pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 200),
                              text_input="HARD", font=get_font(25), base_color=consts.BASE_COLOR,
                              hovering_color=consts.HOVERING_COLOR)
@@ -61,16 +72,19 @@ def main_menu():
                     running = True
                     background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
+                    Time = survival_time("easy")
                     return 'easy'
                 if medium_button.check_for_input(menu_mouse_pos):
                     running = True
                     background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
+                    Time = survival_time("medium")
                     return 'medium'
                 if hard_button.check_for_input(menu_mouse_pos):
                     running = True
                     background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
+                    Time = survival_time("hard")
                     return 'hard'
 
         key = pygame.key.get_pressed()
@@ -157,24 +171,39 @@ pygame.display.set_caption('Galactic Defenders')
 timeout_shadow_player = 3000
 timeout_max_time = 3000
 
+
 def victory_screen():
-    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x,score
+    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x, score, player_angle
     screen.blit(background_image, (0, 0))
     victory_theme = pygame.mixer.Sound(consts.VICTORY_THEME)
     button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
-    background_channel.play(victory_theme, loops=-1)
+    time_game_victory = 1500
+    time_open_victory = pygame.time.get_ticks()
+    bg_music = pygame.mixer.Sound(consts.BG_MUSIC)
+    background_channel.stop()
+    victory_theme_executed = False
+    bg_music_executed = False
 
     while True:
+        current_time_game_over = pygame.time.get_ticks()
+        if current_time_game_over - time_open_victory <= time_game_victory:
+            if not victory_theme_executed:
+                background_channel.play(victory_theme, 0)
+                victory_theme_executed = True
+        else:
+            if not bg_music_executed:
+                background_channel.play(bg_music, -1)
+                bg_music_executed = True
         menu_mouse_pos = pygame.mouse.get_pos()
         menu_text = get_font(38).render("VICTORY!!!", True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
         image = pygame.image.load(consts.RECT)
-        to_main_menu = Button(image =pygame.transform.scale(image,(370,80))    ,
+        to_main_menu = Button(image=pygame.transform.scale(image, (370, 80)),
                               pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) + 120),
                               text_input="Return to Menu", font=get_font(25), base_color=consts.BASE_COLOR,
                               hovering_color=consts.HOVERING_COLOR)
         score_text = font.render(f'Your Score: {score}', True, consts.WHITE)
-        screen.blit(score_text, (consts.WINDOW_WIDTH//2 - 145, 160))
+        screen.blit(score_text, (consts.WINDOW_WIDTH // 2 - 145, 160))
         screen.blit(menu_text, menu_rect)
 
         for button in [to_main_menu]:
@@ -187,15 +216,15 @@ def victory_screen():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if to_main_menu.check_for_input(menu_mouse_pos):
-                    background_channel.play(victory_theme, loops=-1)
+                    background_channel.stop()
                     button_sound.play()
-                    difficulty = main_menu()
                     score = 0
                     bullets_left = 4
                     lifes = 4
                     enemy_list = []
                     player_x = (consts.WINDOW_WIDTH - player_width) // 2
                     player_y = consts.WINDOW_HEIGHT - player_height
+                    difficulty = main_menu()
                     return
             key = pygame.key.get_pressed()
             if key[pygame.K_ESCAPE]:
@@ -205,7 +234,7 @@ def victory_screen():
 
 
 def game_over():
-    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x
+    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x, score, player_angle
     pygame.display.set_caption("Game over")
     screen.blit(background_image, (0, 0))
 
@@ -214,18 +243,24 @@ def game_over():
     time_game_over = 1000
     time_open_game_over = pygame.time.get_ticks()
     background_channel.stop()
+    game_over_sound_executed = False
+    bg_music_executed = False
 
     while True:
         current_time_game_over = pygame.time.get_ticks()
         if current_time_game_over - time_open_game_over <= time_game_over:
-            game_over_sound.play()
+            if not game_over_sound_executed:
+                background_channel.play(game_over_sound, loops=0)
+                game_over_sound_executed = True
         else:
-            bg_music.play()
+            if not bg_music_executed:
+                background_channel.play(bg_music, loops=-1)
+                bg_music_executed = True
         menu_mouse_pos = pygame.mouse.get_pos()
         menu_text = get_font(38).render("GAME OVER", True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
         image = pygame.image.load(consts.RECT)
-        to_main_menu = Button(image =pygame.transform.scale(image,(370,80)) ,
+        to_main_menu = Button(image=pygame.transform.scale(image, (370, 80)),
                               pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) + 120),
                               text_input="Return to menu", font=get_font(25), base_color=consts.BASE_COLOR,
                               hovering_color=consts.HOVERING_COLOR)
@@ -242,24 +277,19 @@ def game_over():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if to_main_menu.check_for_input(menu_mouse_pos):
                     button_sound.play()
-                    difficulty = main_menu()
                     score = 0
                     bullets_left = 4
                     lifes = 4
+                    player_angle = 90
                     enemy_list = []
                     player_x = (consts.WINDOW_WIDTH - player_width) // 2
                     player_y = consts.WINDOW_HEIGHT - player_height
+                    background_channel.stop()
+                    difficulty = main_menu()
                     return
         pygame.display.update()
 
-def survival_time (difficulty):
-    if difficulty == 'easy':
-        return 10*60
-    if difficulty == 'medium':
-        return 150*60
-    if difficulty == 'hard':
-        return 180*60
-Time = survival_time(difficulty)
+
 # Loop principal do jogo
 while running:
     for event in pygame.event.get():
@@ -356,7 +386,7 @@ while running:
         if bullet and enemy.rect.collidepoint(bullet[0], bullet[1]):
             bullet = None  # Remove a bala
             enemy_list.remove(enemy)  # Remove o inimigo atingido
-            score +=1
+            score += 1
 
     if shadow_player:
         if current_time - last_time_blink >= blink_interval:
@@ -404,26 +434,23 @@ while running:
     ammo_text = font.render(f'ammo: {bullets_left}', True, consts.WHITE)
     screen.blit(ammo_text, (10, 70))
 
-
-
-
     # Exibir mensagem de recarregamento, se aplicável
     if reloading:
         reload_text = font.render('reloading...', True, consts.RED)
         screen.blit(reload_text, (10, 95))
 
-    #SCORE
+    # SCORE
     score_text = font.render(f'score: {score}', True, consts.WHITE)
-    screen.blit(score_text, (consts.WINDOW_WIDTH-180, 50))
+    screen.blit(score_text, (consts.WINDOW_WIDTH - 180, 50))
 
-    #TIMER
+    # TIMER
     if Time == 0:
+        running = False
         victory_screen()
     else:
-        time_text = font.render(f'{Time//60}', True, consts.WHITE)
+        time_text = font.render(f'{Time // 60}', True, consts.WHITE)
         screen.blit(time_text, (10, 125))
-        Time -=1
-
+        Time -= 1
 
     # Atualizar a tela
     pygame.display.update()
