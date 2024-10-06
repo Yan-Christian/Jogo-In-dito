@@ -156,6 +156,64 @@ pygame.display.set_caption('Galactic Defenders')
 timeout_shadow_player = 3000
 timeout_max_time = 3000
 
+def victory_screen():
+    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x
+    screen.blit(background_image, (0, 0))
+    victory_theme = pygame.mixer.Sound(consts.VICTORY_THEME)
+    button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
+    background_channel.play(victory_theme, loops=-1)
+
+    while True:
+        menu_mouse_pos = pygame.mouse.get_pos()
+        menu_text = get_font(38).render("VICTORY!!!", True, consts.WHITE)
+        menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
+
+        to_main_menu = Button(image=pygame.image.load(consts.RECT),
+                              pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) + 120),
+                              text_input="Return to menu", font=get_font(25), base_color=consts.BASE_COLOR,
+                              hovering_color=consts.HOVERING_COLOR)
+        see_scoreboard = Button(image=pygame.image.load(consts.RECT),
+                              pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) ),
+                              text_input="Scoreboard", font=get_font(25), base_color=consts.BASE_COLOR,
+                              hovering_color=consts.HOVERING_COLOR)
+        screen.blit(menu_text, menu_rect)
+
+        for button in [to_main_menu, see_scoreboard]:
+            button.change_color(menu_mouse_pos)
+            button.update(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if to_main_menu.check_for_input(menu_mouse_pos):
+                    background_channel.play(victory_theme, loops=-1)
+                    button_sound.play()
+                    difficulty = main_menu()
+                    bullets_left = 4
+                    lifes = 4
+                    enemy_list = []
+                    player_x = (consts.WINDOW_WIDTH - player_width) // 2
+                    player_y = consts.WINDOW_HEIGHT - player_height
+                    return
+
+                if see_scoreboard.check_for_input(menu_mouse_pos):
+                    background_channel.play(victory_theme, loops=-1)
+                    button_sound.play()
+                    difficulty = main_menu()
+                    bullets_left = 4
+                    lifes = 4
+                    enemy_list = []
+                    player_x = (consts.WINDOW_WIDTH - player_width) // 2
+                    player_y = consts.WINDOW_HEIGHT - player_height
+                    return
+            key = pygame.key.get_pressed()
+            if key[pygame.K_ESCAPE]:
+                pygame.quit()
+                sys.exit()
+        pygame.display.update()
+
 
 def game_over():
     global difficulty, lifes, bullets_left, enemy_list, player_y, player_x
@@ -206,7 +264,7 @@ def game_over():
 
 def survival_time (difficulty):
     if difficulty == 'easy':
-        return 120*60
+        return 1*60
     if difficulty == 'medium':
         return 150*60
     if difficulty == 'hard':
@@ -365,9 +423,12 @@ while running:
 
 
     #exhibit time
-    time_text = font.render(f'{Time//60}', True, consts.WHITE)
-    screen.blit(time_text, (10, 125))
-    Time -=1
+    if Time == 0:
+        victory_screen()
+    else:
+        time_text = font.render(f'{Time//60}', True, consts.WHITE)
+        screen.blit(time_text, (10, 125))
+        Time -=1
 
 
     # Atualizar a tela
