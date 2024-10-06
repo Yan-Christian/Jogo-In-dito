@@ -32,16 +32,16 @@ def main_menu():
         menu_mouse_pos = pygame.mouse.get_pos()
         menu_text = get_font(38).render(consts.TITLE, True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
-
-        easy_button = Button(image=pygame.image.load(consts.RECT),
+        image = pygame.image.load(consts.RECT)
+        easy_button = Button(image =pygame.transform.scale(image,(370,80)) ,
                              pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2),
                              text_input="EASY", font=get_font(25), base_color=consts.BASE_COLOR,
                              hovering_color=consts.HOVERING_COLOR)
-        medium_button = Button(image=pygame.image.load(consts.RECT),
+        medium_button = Button(image =pygame.transform.scale(image,(370,80)) ,
                                pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 100),
                                text_input="MEDIUM", font=get_font(25), base_color=consts.BASE_COLOR,
                                hovering_color=consts.HOVERING_COLOR)
-        hard_button = Button(image=pygame.image.load(consts.RECT),
+        hard_button = Button(image =pygame.transform.scale(image,(370,80)) ,
                              pos=(consts.WINDOW_WIDTH // 2, consts.WINDOW_HEIGHT // 2 + 200),
                              text_input="HARD", font=get_font(25), base_color=consts.BASE_COLOR,
                              hovering_color=consts.HOVERING_COLOR)
@@ -151,10 +151,57 @@ def create_enemy():
 
 
 difficulty = main_menu()
+score = 0
 pygame.display.set_caption('Galactic Defenders')
 
 timeout_shadow_player = 3000
 timeout_max_time = 3000
+
+def victory_screen():
+    global difficulty, lifes, bullets_left, enemy_list, player_y, player_x,score
+    screen.blit(background_image, (0, 0))
+    victory_theme = pygame.mixer.Sound(consts.VICTORY_THEME)
+    button_sound = pygame.mixer.Sound(consts.BUTTON_SELECT)
+    background_channel.play(victory_theme, loops=-1)
+
+    while True:
+        menu_mouse_pos = pygame.mouse.get_pos()
+        menu_text = get_font(38).render("VICTORY!!!", True, consts.WHITE)
+        menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
+        image = pygame.image.load(consts.RECT)
+        to_main_menu = Button(image =pygame.transform.scale(image,(370,80))    ,
+                              pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) + 120),
+                              text_input="Return to Menu", font=get_font(25), base_color=consts.BASE_COLOR,
+                              hovering_color=consts.HOVERING_COLOR)
+        score_text = font.render(f'Your Score: {score}', True, consts.WHITE)
+        screen.blit(score_text, (consts.WINDOW_WIDTH//2 - 145, 160))
+        screen.blit(menu_text, menu_rect)
+
+        for button in [to_main_menu]:
+            button.change_color(menu_mouse_pos)
+            button.update(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if to_main_menu.check_for_input(menu_mouse_pos):
+                    background_channel.play(victory_theme, loops=-1)
+                    button_sound.play()
+                    difficulty = main_menu()
+                    score = 0
+                    bullets_left = 4
+                    lifes = 4
+                    enemy_list = []
+                    player_x = (consts.WINDOW_WIDTH - player_width) // 2
+                    player_y = consts.WINDOW_HEIGHT - player_height
+                    return
+            key = pygame.key.get_pressed()
+            if key[pygame.K_ESCAPE]:
+                pygame.quit()
+                sys.exit()
+        pygame.display.update()
 
 
 def game_over():
@@ -177,8 +224,8 @@ def game_over():
         menu_mouse_pos = pygame.mouse.get_pos()
         menu_text = get_font(38).render("GAME OVER", True, consts.WHITE)
         menu_rect = menu_text.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
-
-        to_main_menu = Button(image=pygame.image.load(consts.RECT),
+        image = pygame.image.load(consts.RECT)
+        to_main_menu = Button(image =pygame.transform.scale(image,(370,80)) ,
                               pos=((consts.WINDOW_WIDTH // 2), (consts.WINDOW_HEIGHT // 2) + 120),
                               text_input="Return to menu", font=get_font(25), base_color=consts.BASE_COLOR,
                               hovering_color=consts.HOVERING_COLOR)
@@ -196,6 +243,7 @@ def game_over():
                 if to_main_menu.check_for_input(menu_mouse_pos):
                     button_sound.play()
                     difficulty = main_menu()
+                    score = 0
                     bullets_left = 4
                     lifes = 4
                     enemy_list = []
@@ -206,7 +254,7 @@ def game_over():
 
 def survival_time (difficulty):
     if difficulty == 'easy':
-        return 120*60
+        return 10*60
     if difficulty == 'medium':
         return 150*60
     if difficulty == 'hard':
@@ -308,6 +356,7 @@ while running:
         if bullet and enemy.rect.collidepoint(bullet[0], bullet[1]):
             bullet = None  # Remove a bala
             enemy_list.remove(enemy)  # Remove o inimigo atingido
+            score +=1
 
     if shadow_player:
         if current_time - last_time_blink >= blink_interval:
@@ -363,11 +412,17 @@ while running:
         reload_text = font.render('reloading...', True, consts.RED)
         screen.blit(reload_text, (10, 95))
 
+    #SCORE
+    score_text = font.render(f'score: {score}', True, consts.WHITE)
+    screen.blit(score_text, (consts.WINDOW_WIDTH-180, 50))
 
-    #exhibit time
-    time_text = font.render(f'{Time//60}', True, consts.WHITE)
-    screen.blit(time_text, (10, 125))
-    Time -=1
+    #TIMER
+    if Time == 0:
+        victory_screen()
+    else:
+        time_text = font.render(f'{Time//60}', True, consts.WHITE)
+        screen.blit(time_text, (10, 125))
+        Time -=1
 
 
     # Atualizar a tela

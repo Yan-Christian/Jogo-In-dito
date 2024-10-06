@@ -5,4 +5,5 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: '/Our-game/',
   plugins: [react()],
+  base: "/vite-react-deploy/",
 })
