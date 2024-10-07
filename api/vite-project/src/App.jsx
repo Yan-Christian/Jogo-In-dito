@@ -41,7 +41,7 @@ function App() {
           COMPRE AGORA! 
         </button>
         <p>
-          Disponível até 8 de Outubro
+          Disponível em 8 de Outubro
         </p>
       </div>
       <p className="read-the-docs">
