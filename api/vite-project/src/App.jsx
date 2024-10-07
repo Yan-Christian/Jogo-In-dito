@@ -1,20 +1,33 @@
 import { useState } from 'react'
 import ship from '../../../assets/Player_1/Player 1.png'
 import './App.css'
-
-
+import git from '../src/assets/github-seeklogo.svg'
+import yt from '../src/assets/youtube-2017-seeklogo-2.svg'
+import bg from '../src/assets/background.jpg'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
+    <body>
+      
+
+      <img className="bg"src={bg} alt="" />  
+      <img className="bg1"src={bg} alt="" />  
+      <img className="bg2"src={bg} alt="" />  
+
+
     <><div>
-      <img className="bg"src="../../../assets/Back_Image/space_full_hd.jpg" alt="" />  
 
 
-      <div>
+      <div className='top'>
         <a href="" target="">
           <img src={ship} className="ship" alt="ship" />
+        </a>
+        <a href=""><img src={yt} alt="" className='yt'/> gameplay </a>
+        <a href="https://github.com/Yan-Christian/Our-game" target="new">
+          <img src={git} className="git"alt="" />
+          repositório github
         </a>
       </div>
       <h1>Galatic Defenders!</h1>
@@ -36,6 +49,7 @@ function App() {
       </p>
     </div>
     </>
+    </body>
   )
 }
 
