@@ -24,7 +24,7 @@ function App() {
         <a href="" target="">
           <img src={ship} className="ship" alt="ship" />
         </a>
-        <a href=""><img src={yt} alt="" className='yt'/> gameplay </a>
+        <a href="https://youtu.be/mVVRqQ-QV0M" target='new'><img src={yt} alt="" className='yt'/> gameplay </a>
         <a href="https://github.com/Yan-Christian/Our-game" target="new">
           <img src={git} className="git"alt="" />
           repositório github
