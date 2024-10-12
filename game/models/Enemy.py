@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-import constants
+from game import constants
 
 
 class Enemy:

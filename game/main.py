@@ -5,6 +5,7 @@ import random
 from button import Button
 import mechanics as mec
 from models.Enemy import Enemy
+from models.Explosion import Explosion
 
 running = False
 Time = 0
@@ -142,6 +143,7 @@ game_background_music = pygame.mixer.Sound("assets/Sound game/game_background_so
 
 # Configuração dos inimigos
 enemy_list = []
+explosion_list = []
 enemy_spawn_time = 2000  # Tempo para criação de novos inimigos (em milissegundos)
 last_enemy_spawn = pygame.time.get_ticks()
 
@@ -290,6 +292,12 @@ def game_over():
         pygame.display.update()
 
 
+def create_explosion(enemy_object):
+    global explosion_list
+    explosion = Explosion((enemy_object.rect.x, enemy_object.rect.y))
+    explosion_list.append(explosion)
+
+
 # Loop principal do jogo
 while running:
     for event in pygame.event.get():
@@ -354,7 +362,6 @@ while running:
 
     # Atualizar a bala
     if bullet:
-
         match bullet_direction:
             case consts.BulletDirection.UP:
                 bullet[1] -= bullet_speed
@@ -385,9 +392,15 @@ while running:
         enemy.move()
         if bullet and enemy.rect.collidepoint(bullet[0], bullet[1]):
             bullet = None  # Remove a bala
+            create_explosion(enemy)
             enemy_list.remove(enemy)  # Remove o inimigo atingido
             score += 1
 
+    # Atualizar animação das explosões
+    for explosion in explosion_list:
+        explosion.update()
+
+    # Timer do player inalvejável
     if shadow_player:
         if current_time - last_time_blink >= blink_interval:
             player_visible = not player_visible
@@ -403,6 +416,10 @@ while running:
     # Desenhar inimigos
     for enemy in enemy_list:
         enemy.draw(screen)
+
+    # Desenhar explosões
+    for explosion in explosion_list:
+        explosion.draw(screen)
 
     if shadow_player:
         if current_time - timeout_shadow_player >= cooldown_lost_life * 1000:
