@@ -123,8 +123,8 @@ max_bullets = 4
 cooldown_time = 2
 reloading = False
 reload_start_time = 0
-bullet_direction = consts.BulletDirection.UP
 drawed_bullet = 4
+bullet_direction = None
 
 # life
 cooldown_lost_life = 2
@@ -335,19 +335,19 @@ while running:
         bullets_left -= 1
 
         if player_angle == 0:
-            bullet = Bullet(player_x + player_width // 2, player_y, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
+            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
                             consts.BULLET_SPEED)
             bullet_direction = consts.BulletDirection.UP
         elif player_angle == 90:
-            bullet = Bullet(player_x + player_width // 2, player_y, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
+            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
                             consts.BULLET_SPEED)
             bullet_direction = consts.BulletDirection.LEFT
         elif player_angle == 180:
-            bullet = Bullet(player_x + player_width // 2, player_y, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
+            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
                             consts.BULLET_SPEED)
             bullet_direction = consts.BulletDirection.DOWN
         elif player_angle == -90:
-            bullet = Bullet(player_x + player_width // 2, player_y, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
+            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
                             consts.BULLET_SPEED)
             bullet_direction = consts.BulletDirection.RIGHT
 
@@ -368,18 +368,22 @@ while running:
     if bullet:
         match bullet_direction:
             case consts.BulletDirection.UP:
+                bullet_rotated = pygame.transform.rotate(bullet.image, 90)
                 bullet.rect.y -= bullet_speed
                 if bullet.rect.y <= 0:
                     bullet = None
             case consts.BulletDirection.DOWN:
+                bullet_rotated = pygame.transform.rotate(bullet.image, -90)
                 bullet.rect.y += bullet_speed
                 if bullet.rect.y >= consts.WINDOW_HEIGHT:
                     bullet = None
             case consts.BulletDirection.LEFT:
+                bullet_rotated = pygame.transform.rotate(bullet.image, 180)
                 bullet.rect.x -= bullet_speed
                 if bullet.rect.x <= 0:
                     bullet = None
             case consts.BulletDirection.RIGHT:
+                bullet_rotated = pygame.transform.rotate(bullet.image, 0)
                 bullet.rect.x += bullet_speed
                 if bullet.rect.x >= consts.WINDOW_WIDTH:
                     bullet = None
@@ -414,6 +418,11 @@ while running:
     screen.blit(background_image, (0, 0))  # Fundo
     player_rotated = pygame.transform.rotate(player_original, player_angle)
 
+
+    # Desenhar a bala
+    if bullet:
+
+        screen.blit(bullet_rotated, (player_x - (player_width // 2), player_y - player_height - 10))
     if player_visible:
         screen.blit(player_rotated, (player_x, player_y))  # Nave
 
@@ -446,11 +455,7 @@ while running:
 
     draw_lifes(lifes)
 
-    # Desenhar a bala
-    if bullet:
-        bullet_rotated = pygame.transform.rotate(bullet.image, player_angle + 90)
-        screen.blit(bullet_rotated, (bullet.rect.x, bullet.rect.y))
-        bullet.draw(screen)
+
 
     # Exibir balas restantes
     font = get_font(20)

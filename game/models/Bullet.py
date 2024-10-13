@@ -16,4 +16,4 @@ class Bullet:
         self.rect.y += self.speed * self.rect.y
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image, self.rect.center)
