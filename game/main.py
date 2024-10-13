@@ -7,6 +7,7 @@ import mechanics as mec
 from models.Enemy import Enemy
 from models.Explosion import Explosion
 from models.Bullet import Bullet
+
 running = False
 Time = 0
 
@@ -125,6 +126,7 @@ reloading = False
 reload_start_time = 0
 drawed_bullet = 4
 bullet_direction = None
+bullet_rotated = None
 
 # life
 cooldown_lost_life = 2
@@ -335,20 +337,24 @@ while running:
         bullets_left -= 1
 
         if player_angle == 0:
-            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
-                            consts.BULLET_SPEED)
+            bullet = Bullet(player_x - (player_width // 2), player_y - (player_height // 2), consts.BULLET_RADIUS,
+                            consts.BULLET_RADIUS,
+                            consts.BULLET_SPEED, consts.BulletDirection.UP)
             bullet_direction = consts.BulletDirection.UP
         elif player_angle == 90:
-            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
-                            consts.BULLET_SPEED)
+            bullet = Bullet(player_x - (player_width // 2), player_y - (player_height // 2), consts.BULLET_RADIUS,
+                            consts.BULLET_RADIUS,
+                            consts.BULLET_SPEED, consts.BulletDirection.LEFT)
             bullet_direction = consts.BulletDirection.LEFT
         elif player_angle == 180:
-            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
-                            consts.BULLET_SPEED)
+            bullet = Bullet(player_x - (player_width // 2), player_y - (player_height // 2), consts.BULLET_RADIUS,
+                            consts.BULLET_RADIUS,
+                            consts.BULLET_SPEED, consts.BulletDirection.DOWN)
             bullet_direction = consts.BulletDirection.DOWN
         elif player_angle == -90:
-            bullet = Bullet(player_x + player_width // 2, player_y-10, consts.BULLET_RADIUS, consts.BULLET_RADIUS,
-                            consts.BULLET_SPEED)
+            bullet = Bullet(player_x - (player_width // 2), player_y - (player_height // 2), consts.BULLET_RADIUS,
+                            consts.BULLET_RADIUS,
+                            consts.BULLET_SPEED, consts.BulletDirection.RIGHT)
             bullet_direction = consts.BulletDirection.RIGHT
 
         # inicia a recarga
@@ -364,29 +370,8 @@ while running:
             bullets_left = max_bullets
             reloading = False
 
-    # Atualizar a bala
     if bullet:
-        match bullet_direction:
-            case consts.BulletDirection.UP:
-                bullet_rotated = pygame.transform.rotate(bullet.image, 90)
-                bullet.rect.y -= bullet_speed
-                if bullet.rect.y <= 0:
-                    bullet = None
-            case consts.BulletDirection.DOWN:
-                bullet_rotated = pygame.transform.rotate(bullet.image, -90)
-                bullet.rect.y += bullet_speed
-                if bullet.rect.y >= consts.WINDOW_HEIGHT:
-                    bullet = None
-            case consts.BulletDirection.LEFT:
-                bullet_rotated = pygame.transform.rotate(bullet.image, 180)
-                bullet.rect.x -= bullet_speed
-                if bullet.rect.x <= 0:
-                    bullet = None
-            case consts.BulletDirection.RIGHT:
-                bullet_rotated = pygame.transform.rotate(bullet.image, 0)
-                bullet.rect.x += bullet_speed
-                if bullet.rect.x >= consts.WINDOW_WIDTH:
-                    bullet = None
+        bullet.move(bullet_direction)
 
     # Criar novos inimigos de acordo com o tempo
     current_time = pygame.time.get_ticks()
@@ -398,7 +383,7 @@ while running:
     # Atualizar movimento dos inimigos e verificar colisões
     for enemy in enemy_list:
         enemy.move()
-        if bullet and enemy.rect.collidepoint(bullet.rect.x, bullet.rect.y):
+        if bullet and enemy.rect.colliderect(bullet.rect):
             bullet = None  # Remove a bala
             create_explosion(enemy)
             enemy_list.remove(enemy)  # Remove o inimigo atingido
@@ -418,11 +403,8 @@ while running:
     screen.blit(background_image, (0, 0))  # Fundo
     player_rotated = pygame.transform.rotate(player_original, player_angle)
 
-
-    # Desenhar a bala
     if bullet:
-
-        screen.blit(bullet_rotated, (player_x - (player_width // 2), player_y - player_height - 10))
+        bullet = bullet.draw(screen)
     if player_visible:
         screen.blit(player_rotated, (player_x, player_y))  # Nave
 
@@ -454,8 +436,6 @@ while running:
                 timeout_shadow_player = current_time
 
     draw_lifes(lifes)
-
-
 
     # Exibir balas restantes
     font = get_font(20)
