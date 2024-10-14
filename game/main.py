@@ -18,7 +18,6 @@ pygame.mixer.init()
 background_channel = pygame.mixer.Channel(0)
 sound_effect_channel = pygame.mixer.Channel(1)
 
-
 def survival_time(difficulty):
     if difficulty == 'easy':
         return 120 * 60
@@ -26,6 +25,45 @@ def survival_time(difficulty):
         return 150 * 60
     if difficulty == 'hard':
         return 180 * 60
+
+
+def controls_screen():
+    # Carregar o fundo e exibir a tela de controles
+    pygame.display.set_caption("Game Controls")
+    background = pygame.image.load("assets/Back_Image/Controls.jpg")
+
+    # Textos dos controles
+    font = get_font(13)
+    controls_title = font.render("Game Controls", True, consts.WHITE)
+    controls_text_1 = font.render("Arrow Keys: Move the spaceship", True, consts.WHITE)
+    controls_text_2 = font.render("Space: Shoot", True, consts.WHITE)
+    controls_text_3 = font.render("ESC: Quit the game", True, consts.WHITE)
+    controls_text_4 = font.render("Press any key to start", True, consts.YELLOW)
+
+    # Posição dos textos
+    title_rect = controls_title.get_rect(center=(consts.WINDOW_WIDTH // 2, 100))
+    text_1_rect = controls_text_1.get_rect(center=(consts.WINDOW_WIDTH // 2, 200))
+    text_2_rect = controls_text_2.get_rect(center=(consts.WINDOW_WIDTH // 2, 250))
+    text_3_rect = controls_text_3.get_rect(center=(consts.WINDOW_WIDTH // 2, 300))
+    text_4_rect = controls_text_4.get_rect(center=(consts.WINDOW_WIDTH // 2, 400))
+
+    while True:
+        screen.blit(background, (0, 0))
+        screen.blit(controls_title, title_rect)
+        screen.blit(controls_text_1, text_1_rect)
+        screen.blit(controls_text_2, text_2_rect)
+        screen.blit(controls_text_3, text_3_rect)
+        screen.blit(controls_text_4, text_4_rect)
+
+        pygame.display.update()
+
+        # Esperar por qualquer evento de tecla para sair da tela de controles
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                return  # Sai da função ao pressionar qualquer tecla
 
 
 def get_font(size):
@@ -75,18 +113,21 @@ def main_menu():
                     background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
                     Time = survival_time("easy")
+                    controls_screen()
                     return 'easy'
                 if medium_button.check_for_input(menu_mouse_pos):
                     running = True
                     background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
                     Time = survival_time("medium")
+                    controls_screen()
                     return 'medium'
                 if hard_button.check_for_input(menu_mouse_pos):
                     running = True
                     background_channel.play(game_background_music, loops=-1)
                     button_sound.play()
                     Time = survival_time("hard")
+                    controls_screen()
                     return 'hard'
 
         key = pygame.key.get_pressed()
@@ -117,10 +158,10 @@ blink_interval = 250
 player_visible = True
 
 # bullet setup
-bullet_speed = 7
+bullet_speed = 12
 bullet = None
-bullets_left = 4
-max_bullets = 4
+bullets_left = 5
+max_bullets = 5
 cooldown_time = 2
 reloading = False
 reload_start_time = 0
